@@ -65,6 +65,10 @@
 (defun cdb--get-exe-path ()
   "C:/Program Files (x86)/Windows Kits/8.1/Debuggers/x64/cdb.exe")
 
+(defun cdb-debug-process (pid)
+  (interactive "nProcess ID: ")
+  (cdb-run (number-to-string pid) "-p" (number-to-string pid)))
+
 (defun cdb-run (&optional identifier &rest arguments)
   (interactive)
   (let* ((full-name (concat "cdb " identifier))
