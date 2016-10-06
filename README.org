@@ -1,0 +1,23 @@
+* cdb-comint-mode (v0.0.1)
+Run a cdb.exe in an inferior process window.
+
+cdb-comint-mode is a comint mode for Emacs which allows you to run a
+cdb.exe (command line version of windbg) in a inferior process.
+
+** Main features
+
+- Syntax highlighting.
+- Automatic SOS loading, across .NET versions.
+- Clickable pointers.
+
+** Installation
+
+Put cdb-comint-mode.el in your load path. Add (require
+'cdb-comint-mode) to your .emacs or ~/.emacs.d/init.el.
+Real package will be provided eventually.
+
+** Usage
+
+Do: `M-x cdb-dump<RET>your dump-file'
+
+Away you go.
