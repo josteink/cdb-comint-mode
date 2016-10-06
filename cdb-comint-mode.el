@@ -87,7 +87,7 @@
 (define-derived-mode cdb-comint-mode comint-mode "CDB"
   (make-local-variable 'comint-output-filter-function)
   (setq-local comint-output-filter-functions #'cdb--update-hightlight)
-  (setq-local cdb--pointer-pos nil)
+  (setq-local cdb--pointer-update-pos nil)
   ;; this makes it read only; a contentious subject as some prefer the
   ;; buffer to be overwritable.
   (setq comint-prompt-read-only t)
@@ -102,7 +102,7 @@
     ;; optimized update
     (if cdb--pointer-update-pos
         (goto-char cdb--pointer-update-pos)
-      (beginning-of-buffer))
+      (goto-char (point-min)))
 
     (let ((map (make-sparse-keymap)))
       (define-key map [mouse-1] #'cdb--dump-object)
