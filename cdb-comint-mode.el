@@ -44,6 +44,7 @@
   "Function to call upon cdb-comint-mode buffer changes.")
 
 (defvar cdb--pointer-update-pos nil)
+(defvar cdb--file-link-update-pos nil)
 (defvar cdb--latest-buffer nil)
 
 (defun cdb--update-hightlight (&optional string)
@@ -56,6 +57,7 @@
   (hi-lock-face-buffer "[A-Za-z]+Exception" 'hi-red-b)
 
   (cdb--update-pointers)
+  (cdb--update-file-links)
 
   (when cdb-custom-update-function
     (funcall cdb-custom-update-function)))
@@ -92,12 +94,15 @@
   (make-local-variable 'comint-output-filter-function)
   (setq-local comint-output-filter-functions #'cdb--update-hightlight)
   (setq-local cdb--pointer-update-pos nil)
+  (setq-local cdb--file-link-update-pos nil)
   ;; this makes it read only; a contentious subject as some prefer the
   ;; buffer to be overwritable.
   (setq comint-prompt-read-only t)
   (cdb--update-hightlight))
 
+;;
 ;; make pointers clicky
+;;
 (defconst cdb--pointer-regexp "[a-fA-F0-9]\\{8,16\\}")
 
 (defun cdb--update-pointers ()
@@ -152,6 +157,52 @@
         (goto-char (point-max))
         (insert (concat "!do " pointer)))
       (comint-send-input))))
+
+;;
+;; make source-line references clicky
+;;
+
+;; should match [D:\Source\foo bar\mega.baz.cs @ 234]
+(defconst cdb--source-line-regexp
+  "\\[\\([A-Z]:[\\A-Za-z0-9\\ \.]+\\) @ \\([0-9]+\\)\\]")
+
+(defun cdb--update-file-links ()
+  (interactive)
+  (save-excursion
+    ;; optimized update
+    (if cdb--file-link-update-pos
+        (goto-char cdb--file-link-update-pos)
+      (goto-char (point-min)))
+
+    (let ((map (make-sparse-keymap)))
+      (define-key map [mouse-1] #'cdb--visit-file)
+      (while (re-search-forward cdb--source-line-regexp nil t)
+        (let ((start (match-beginning 0))
+              (end   (match-end 2))
+              (filename (match-string 1))
+              (line-num (match-string 2)))
+          (add-text-properties
+           start end (list 'mouse-face 'highlight
+                           'help-echo   "mouse-2: dump the object represented by this link"
+                           'keymap      map
+                           'filename    filename
+                           'line-num    line-num)))))
+    (setq cdb--file-link-update-pos (point-max))))
+
+(defun cdb--visit-file (event)
+  (interactive "e")
+
+  (let ((window (posn-window (event-end event)))
+        (pos (posn-point (event-end event)))
+        file)
+    (if (not (windowp window))
+        (error "No pointer found"))
+    (with-current-buffer (window-buffer window)
+      (goto-char pos)
+      (let ((filename (get-text-property (point) 'filename))
+            (line-num (get-text-property (point) 'line-num)))
+        (find-file filename)
+        (goto-line (string-to-number line-num))))))
 
 
 ;; utility functions

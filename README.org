@@ -9,6 +9,7 @@ cdb.exe (command line version of windbg) in a inferior process.
 - Syntax highlighting.
 - Automatic SOS loading, across .NET versions.
 - Clickable pointers.
+- Source-code navigation from stack-traces.
 
 ** Installation
 
