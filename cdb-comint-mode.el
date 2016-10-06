@@ -106,3 +106,18 @@
         (goto-char (point-max))
         (insert (concat "!do " pointer)))
       (comint-send-input))))
+
+
+;; utility functions
+
+(defun cdb-send-command (string)
+  (let ((buffer (get-buffer-create "*cdb*")))
+    (comint-send-string (get-buffer-process buffer)
+                        (concat string "\n"))))
+
+(defun cdb-load-sos ()
+  (interactive)
+  (cdb-send-command ".sympath %temp%\symbolcache")
+  (cdb-send-command ".symfix+")
+  (cdb-send-command ".cordll -ve -u -l")
+  (cdb-send-command ".reload"))
