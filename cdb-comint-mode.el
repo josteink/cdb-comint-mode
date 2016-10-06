@@ -117,7 +117,7 @@
 
 (defun cdb-load-sos ()
   (interactive)
-  (cdb-send-command ".sympath %temp%\symbolcache")
+  (cdb-send-command ".sympath %temp%\\symbolcache")
   (cdb-send-command ".symfix+")
   (cdb-send-command ".cordll -ve -u -l")
   (cdb-send-command ".reload"))
